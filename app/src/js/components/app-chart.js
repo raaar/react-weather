@@ -79,13 +79,25 @@ var Chart = React.createClass({
 
 		getInitialState: function() {
 			return { 
-				forecastData: '',
-				temp: 0
+				data: []
 			}
 		},
 
 		componentWillMount: function(){
-			this.forecastIoJquery();
+			//this.forecastIoJquery();
+			var key = '4f59dcd1b79c4aceab6901b0f5443daa';
+			var url = 'https://api.forecast.io/forecast/'+key+'/37.8267,-122.423';
+			reqwest({
+				url: url,
+				type: 'jsonp',
+				success: function(resp){
+					this.setState({
+						data: resp
+					})
+
+					console.log(resp)
+				}.bind(this)
+			})
 		},
 
 		componentDidMount: function() {
@@ -94,10 +106,10 @@ var Chart = React.createClass({
 
 		render:function(){
 
-			console.log(this.state.temp)
+			//console.log(this.state.temp)
 
 
-var data = [{"letter":"A","frequency": this.state.temp},
+var data = [{"letter":"A","frequency":".01492"},
 			{"letter":"B","frequency":".01492"}];
 
 
