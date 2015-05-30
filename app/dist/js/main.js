@@ -28,8 +28,8 @@ var Chart = React.createClass({displayName: "Chart",
 		},
 
 		getWeatherData: function(lat, lon){
-			console.log(lat)
-			console.log(lon)
+			//console.log(lat)
+			//console.log(lon)
 			var key = '4f59dcd1b79c4aceab6901b0f5443daa';
 			var url = 'https://api.forecast.io/forecast/'+key+'/'+lat+','+lon;
 			reqwest({
@@ -99,7 +99,7 @@ var Chart = React.createClass({displayName: "Chart",
 			//http://alignedleft.com/tutorials/d3/making-a-bar-chart
 
 			//Width and height
-			var w = 1170;
+			var w = 1140;
 			var h = 300;
 			var barPadding = 1;
 			

@@ -1,6 +1,9 @@
 @import "../../bower_components/sass-css3-mixins/css3-mixins.scss";
 
-
+/*  
+ 
+Loader
+----------------------------------------------------------     */
 .loading {
 	background: black;
 	@include transition;
@@ -17,6 +20,13 @@
 	}
 }
 
+.loaded {
+	background: white;
+	@include transition;
+	.loader {
+		display: none;
+	}
+}
 
 
 .loader,
@@ -88,23 +98,15 @@
 
 
 
+.chart {
+	overflow-x: scroll;
 
-
-
-.loaded {
-	background: white;
-	@include transition;
-	.loader {
-		display: none;
-	}
-}
-
-.left {
-	float: left !important;
-}
-
-.right {
-	float: right !important;
+	-webkit-overflow-scrolling: touch;
+  	-webkit-transform: translate3d(0, 0, 0);
+  	-webkit-transition: 0.3s,overflow-x;
+  	-moz-transition: 0.3s,overflow-x;
+  	-o-transition: 0.3s,overflow-x;
+  	transition: 0.3s,overflow-x;
 }
 
 .iconBox {
@@ -121,4 +123,18 @@ footer {
 	a {
 		color: darkgrey;
 	}
+}
+
+
+
+/*  
+ 
+Helpers
+----------------------------------------------------------     */
+.left {
+	float: left !important;
+}
+
+.right {
+	float: right !important;
 }
