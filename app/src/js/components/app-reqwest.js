@@ -21,8 +21,8 @@ var Chart = React.createClass({
 			// will display time in 10:30:23 format
 			var formattedTime = hours + ':' + minutes.substr(minutes.length-2) + ':' + seconds.substr(seconds.length-2);
 			
-			console.log(formattedTime)
-			return formattedTime;
+
+			return hours;
 
 		},
 
@@ -50,12 +50,13 @@ var Chart = React.createClass({
 		},
 
 		renderChart: function(dataset){
-			console.log(this.convertTimestamp(1432933200))
+			//console.log(this.convertTimestamp(1432933200))
+			var scope = this;
 
 			var hourly = dataset.hourly.data; 
 			var day = _.dropRight(hourly, 24)
 
-			console.log(dataset)
+			//console.log(dataset)
 			//http://alignedleft.com/tutorials/d3/making-a-bar-chart
 
 			//Width and height
@@ -71,7 +72,11 @@ var Chart = React.createClass({
 			var svg = d3.select(".chart")
 						.append("svg")
 						.attr("width", w)
-						.attr("height", h);
+						.attr("height", h + 40);
+
+				var texts = svg.selectAll("text")
+				   .data(day)
+				   .enter()
 
 			svg.selectAll("rect")
 			   .data(day)
@@ -91,9 +96,8 @@ var Chart = React.createClass({
 					return "rgb(0, 0, " + (Math.round(d.apparentTemperature * 2)) + ")";
 			   })
 			   
-				svg.selectAll("text")
-				   .data(day)
-				   .enter()
+
+				texts
 				   .append("text")
 				   .text(function(d) {
 				   		return Math.round(d.apparentTemperature);
@@ -103,83 +107,29 @@ var Chart = React.createClass({
 				   		return i * (w / day.length) + (w / day.length - barPadding) / 2;
 				   })
 				   .attr("y", function(d) {
-				   		return h - (d.apparentTemperature * 4) + 14;
+				   		return h - (d.apparentTemperature * 4) + 20;
 				   })
 				   .attr("font-family", "sans-serif")
 				   .attr("font-size", "11px")
 				   .attr("fill", "white")
 				   .append("text")
 
+				texts
+				   .append('text')
+				   .text(function(d){
+				   		return scope.convertTimestamp(d.time)
+				   })
+				   .attr("text-anchor", "middle")
+				   .attr("x", function(d, i) {
+				   		return i * (w / day.length) + (w / day.length - barPadding) / 2;
+				   })
+				   	.attr("y", function(d) {
+			   		return h + 20;
+			   		})
+			   	 	.attr("fill", "red")
 
 
-/*  
- New with too ltip
 
-----------------------------------------------------------     */
-
-var margin = {top: 20, right: 0, bottom: 30, left: 20},
-    width = 1170 - margin.left - margin.right,
-    height = 300 - margin.top - margin.bottom;
-
-var x = d3.scale.ordinal()
-    .rangeRoundBands([0, width], .03);
-
-var y = d3.scale.linear()
-    .range([height, 0]);
-
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom");
-
-var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
-    .ticks(5, "");
-
-var svg = d3.select(".chart").append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-  	.append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-  	x.domain(day.map(function(d){ return d.apparentTemperature}));
-  	y.domain([0, d3.max(day, function(d){return d.apparentTemperature})]);
-
-
-  	svg.append("g")
-      	.attr("class", "x axis")
-      	.attr("transform", "translate(0," + height + ")")
-      	.call(xAxis);
-
-  	svg.append("g")
-      	.attr("class", "y axis")
-      	.call(yAxis)
-
-    .append("text")
-      	.attr("transform", "rotate(-90)")
-      	.attr("y", 6)
-      	.attr("dy", ".71em")
-      	.style("text-anchor", "end")
-      	.text("Temperature");
-
-  	svg.selectAll(".bar")
-      	.data(day)
-    	.enter().append("rect")
-      	.attr("class", "bar")
-      	.attr("x", function(d) { return x(d.apparentTemperature); })
-      	.attr("width", x.rangeBand())
-      	.attr("y", function(d) { return y(d.apparentTemperature); })
-      	.attr("height", function(d) { return height - y(d.apparentTemperature); })
-      	.attr("fill", function(d) {
-			return "rgb(0, 0, " + (Math.round(d.apparentTemperature * 2)) + ")";
-		})
-
-
-function type(d) {
-  d.frequency = +d.frequency;
-  return d;
-}
 
 
 		},
