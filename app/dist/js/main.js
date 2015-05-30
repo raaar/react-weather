@@ -23,41 +23,79 @@ var Chart = React.createClass({displayName: "Chart",
 			var formattedTime = hours + ':' + minutes.substr(minutes.length-2) + ':' + seconds.substr(seconds.length-2);
 			
 
-			return hours;
+			return [hours, hours + ":"+ minutes.substr(minutes.length-2)];
 
 		},
 
-		getInitialState: function() {
-			return { 
-				data: []
-			}
-		},
-
-		componentWillMount: function(){
-			//this.forecastIoJquery();
+		getWeatherData: function(lat, lon){
+			console.log(lat)
+			console.log(lon)
 			var key = '4f59dcd1b79c4aceab6901b0f5443daa';
-			var url = 'https://api.forecast.io/forecast/'+key+'/51.5072,0.1275';
+			var url = 'https://api.forecast.io/forecast/'+key+'/'+lat+','+lon;
 			reqwest({
 				//url: 'http://filltext.com?rows=10&val={randomNumber}',
 				url: url,
 				type: 'jsonp',
 				success: function(resp){
+					document.body.className = 'loaded';
+					
 					this.setState({
 						data: resp
 					})
+					
 					this.renderChart(this.state.data)
+					this.setState({
+						summary: this.state.data.currently.summary,
+						time: this.state.data.currently.time,
+						icon: this.state.data.currently.icon,
+						license: this.state.data.flags['metno-license']
+					})
 				}.bind(this)
 			})
 		},
 
+		getInitialState: function() {
+			return { 
+				data: [],
+				time: 0,
+				summary: '',
+				license: '',
+				icon: ''
+			}
+		},
+
+		componentWillMount: function(){
+			//this.forecastIoJquery();
+			var scope = this;
+			if (navigator.geolocation) {
+        		navigator.geolocation.getCurrentPosition(showPosition, handleError);
+    		} else {
+        		//x.innerHTML = "Geolocation is not supported by this browser.";
+        		scope.getWeatherData(51.5072 , 0.1275)
+    		}
+
+    		function showPosition(position) {
+    			var lat =  position.coords.latitude;
+    			var lon = position.coords.longitude; 
+    			scope.getWeatherData(lat, lon);
+			}
+
+			function handleError(){
+				scope.getWeatherData(51.5072 , 0.1275)
+			}
+		},
+
+
 		renderChart: function(dataset){
 			//console.log(this.convertTimestamp(1432933200))
+
 			var scope = this;
 
 			var hourly = dataset.hourly.data; 
 			var day = _.dropRight(hourly, 24)
 
-			//console.log(dataset)
+			console.log(dataset)
+			//console.log(dataset.hourly.summary)
 			//http://alignedleft.com/tutorials/d3/making-a-bar-chart
 
 			//Width and height
@@ -65,10 +103,6 @@ var Chart = React.createClass({displayName: "Chart",
 			var h = 300;
 			var barPadding = 1;
 			
-			//var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
-			//				11, 12, 15, 20, 18, 17, 16, 18, 23, 25 ];
-			
-
 			//Create SVG element
 			var svg = d3.select(".chart")
 						.append("svg")
@@ -94,7 +128,11 @@ var Chart = React.createClass({displayName: "Chart",
 			   		return d.apparentTemperature * 4;
 			   })
 			   .attr("fill", function(d) {
-					return "rgb(0, 0, " + (Math.round(d.apparentTemperature * 2)) + ")";
+			   		var calc = Math.round( -(d.apparentTemperature - 50) * 5)
+					return "rgb(0, "
+						+ (119 - calc) + 
+						", " 
+						+ (255 - calc) + ")";
 			   })
 			   
 
@@ -118,8 +156,10 @@ var Chart = React.createClass({displayName: "Chart",
 				texts
 				   .append('text')
 				   .text(function(d){
-				   		return scope.convertTimestamp(d.time)
+				   		var theTime = scope.convertTimestamp(d.time)
+				   		return theTime[0]
 				   })
+				   .attr('class','time')
 				   .attr("text-anchor", "middle")
 				   .attr("x", function(d, i) {
 				   		return i * (w / day.length) + (w / day.length - barPadding) / 2;
@@ -127,10 +167,7 @@ var Chart = React.createClass({displayName: "Chart",
 				   	.attr("y", function(d) {
 			   		return h + 20;
 			   		})
-			   	 	.attr("fill", "red")
-
-
-
+			   	 	.attr("fill", "rgba(0,0,0,0.6)")
 
 
 		},
@@ -139,9 +176,30 @@ var Chart = React.createClass({displayName: "Chart",
 		},
 
 		render:function(){
+
+	  		var skycons = new Skycons({"color": "darkgrey"});
+	  		skycons.add("icon1", this.state.icon);
+			skycons.play();
+
 			return (
 				React.createElement("div", null, 
-					React.createElement("div", {className: "chart"})
+					React.createElement("div", {className: "row"}, 
+						React.createElement("div", {className: "col-lg-12"}, 
+							React.createElement("div", {className: "chart"})
+						), 
+
+						React.createElement("div", {className: "col-lg-3"}, 
+							React.createElement("div", {className: "iconBox"}, 
+								React.createElement("canvas", {id: "icon1", width: "128", height: "128"})
+							)
+						), 
+
+						React.createElement("div", {className: "col-lg-6"}, 
+							React.createElement("h1", null, this.convertTimestamp(this.state.time)[1]), 
+							React.createElement("h1", null, this.state.data.timezone), 
+							React.createElement("h2", null, this.state.summary)
+						)
+					)
 				)
 				)
 		}
